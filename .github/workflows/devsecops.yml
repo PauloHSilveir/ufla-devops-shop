@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: ghcr.io/paulohsilveir/ufla-shop
+  IMAGE_NAME: ghcr.io/paulohsilveir/ufla-devops-shop
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
@@ -36,6 +36,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_SUMMARY: "false"
 
   qualidade:
     name: Testes e SAST / SonarCloud
