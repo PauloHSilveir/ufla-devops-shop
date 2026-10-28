@@ -69,59 +69,9 @@ Com `DATABASE_URL` e `REDIS_URL` ela usa PostgreSQL e Redis. Rotas, variáveis,
 modos e os tamanhos reais de imagem estão em
 **[docs/aplicacao.md](docs/aplicacao.md)** — leia antes da Atividade 4.
 
-## Pipeline DevSecOps
-
-O workflow [`.github/workflows/devsecops.yml`](.github/workflows/devsecops.yml)
-executa em toda abertura ou atualização de Pull Request para `main` e em todo
-push na própria `main`. Ele aplica estes gates antes de publicar a imagem:
-
-| Etapa | Verificação | Regra de bloqueio |
-|---|---|---|
-| Gitleaks | Segredos em todo o histórico Git | Qualquer possível senha, token ou chave faz o job falhar. |
-| Testes e Ruff | Testes automatizados, cobertura e lint | Qualquer teste ou regra de lint com falha bloqueia o pipeline. |
-| SonarCloud | SAST e Quality Gate sobre código novo | O scanner aguarda o resultado e falha se o Quality Gate for reprovado. |
-| Trivy (dependências) | CVEs nos manifests do repositório | `HIGH` e `CRITICAL` com correção disponível bloqueiam; todas as severidades ficam no artifact `trivy-dependencias`. |
-| Trivy (imagem) | CVEs do sistema operacional e bibliotecas da imagem | `HIGH` e `CRITICAL` com correção disponível bloqueiam; todas as severidades ficam no artifact `trivy-imagem`. |
-| Syft | Inventário de componentes e versões da imagem | Gera o SBOM `sbom-imagem.spdx.json` e o publica como artifact por 30 dias. |
-
-A imagem `ghcr.io/paulohsilveir/ufla-shop` só é enviada ao GHCR em um push na
-`main`, depois que Gitleaks, testes, SonarCloud, as duas análises do Trivy e a
-geração do SBOM terminam com sucesso. Pull Requests apenas constroem e analisam
-a imagem; nunca a publicam.
-
-### Configuração do SonarCloud e da proteção da branch
-
-Depois de importar este repositório no SonarCloud, configure no GitHub o secret
-`SONAR_TOKEN` e as variables `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY`. No
-SonarCloud, use um Quality Gate para código novo com, no mínimo, avaliação A em
-segurança, confiabilidade e manutenibilidade, 100% dos hotspots revisados,
-cobertura de pelo menos 80% e no máximo 3% de duplicação. O parâmetro
-`sonar.qualitygate.wait=true` transforma a reprovação do gate em falha do job.
-
-Nas regras de proteção da `main`, exija Pull Request e os checks abaixo antes
-do merge:
-
-- `Segredos / Gitleaks`;
-- `Testes e SAST / SonarCloud`;
-- `Dependencias / Trivy`;
-- `Imagem / Trivy, Syft e publicacao`.
-
-### Demonstração de bloqueio e correção
-
-Faça a demonstração somente em uma branch descartável. Adicione temporariamente
-uma versão de dependência com CVE conhecida e correção disponível ao
-`requirements.txt`, abra o Pull Request e registre a falha do job
-`Dependencias / Trivy` junto ao trecho que mostra CVE, versão instalada e versão
-corrigida. Atualize a dependência para a versão corrigida no mesmo Pull Request
-e registre a execução aprovada. Nunca faça merge do commit vulnerável e nunca
-use credenciais reais para testar o Gitleaks.
-
-Um caso reproduzível para a demonstração é `requests==2.19.1`: o Trivy aponta
-`CVE-2018-18074` como `HIGH` e informa correção a partir da versão `2.20.0`.
-Troque depois para `requests==2.34.2`, confirme que o gate passou e feche o PR
-sem merge, pois essa biblioteca não é necessária para a aplicação. As duas
-execuções devem ficar no mesmo PR para evidenciar claramente o bloqueio e a
-correção.
+O CI/CD também integra **Gitleaks, SonarCloud, Trivy e Syft**. A descrição dos
+gates, artifacts, regras de bloqueio e evidências está em
+**[docs/devsecops.md](docs/devsecops.md)**.
 
 ### Seu fork está desatualizado?
 
