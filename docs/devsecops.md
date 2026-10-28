@@ -54,5 +54,5 @@ A proteção da `main` deve exigir Pull Request e estes checks:
 ## Evidências
 
 As capturas da execução bloqueada, do relatório da vulnerabilidade, da execução
-aprovada e do artifact SBOM serão registradas em `docs/evidencias/` após as
-execuções do Pull Request de demonstração.
+aprovada e do artifact SBOM estão documentadas em
+[`docs/evidencias/README.md`](evidencias/README.md).
